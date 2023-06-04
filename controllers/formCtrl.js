@@ -12,6 +12,7 @@ exports.newForm = async (req, res, next) => {
         });
         await newForm.save();
         res.status(200).json({
+            messaeg: 'new form creation success!',
             newForm
         });
     } catch (err) {
@@ -22,6 +23,7 @@ exports.newForm = async (req, res, next) => {
 
 exports.addingFormField = async (req, res, next) => {
     try {
+        const form = await Form.findById(req.params.id);
         const {
             fieldName,
             placeholder,
@@ -40,7 +42,6 @@ exports.addingFormField = async (req, res, next) => {
             err.statusCode = 422;
             throw err;
         }
-
         const field = new FormField({
             fieldName,
             placeholder,
@@ -51,22 +52,19 @@ exports.addingFormField = async (req, res, next) => {
             isAction,
             callbackUrl
         });
-
         if(title.length > 5 && value2.length > 2) {
             field.options.push({
                 title: title,
                 value: value2
             });
         }        
-
         await field.save();
-        const form = await Form.findById(req.params.id);
         form.fields.push(field._id);
         await form.save();
 
         res.status(200).json({
-            message: 'OK NA SA',
-            form: form
+            message: 'adding form field success',
+            formField: field
         });
 
     } catch (err) {
@@ -84,20 +82,18 @@ exports.updateActive = async (req, res, next) => {
             throw err;
         }
         const existSubmit = fields.filter(submit => submit.fieldName === 'submit');
-
         if(existSubmit.length === 0){
             const err = new Error('submit form-field is needed to active form!');
             err.statusCode = 422;
             throw err;
         }
-
         form.isActive = true;
         await form.save();
 
         res.status(200).json({
-            message: 'form activation success!'
-        })
-        
+            message: 'form activation success!',
+            form_status: form
+        });
 
     } catch (err) {
         next(err);
