@@ -31,12 +31,10 @@ const formFieldSchema = new Schema({
     },
     options: [{
         title: {
-            type: String,
-            required: true
+            type: String
         },
         value: {
-            type: String,
-            required: true
+            type: String
         }
     }]
 });

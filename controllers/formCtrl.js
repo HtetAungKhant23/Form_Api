@@ -1,12 +1,12 @@
 const FormField = require("../models/formFieldModel");
-const NewForm = require("../models/newFormModel");
+const Form = require("../models/newFormModel");
 const { validationResult } = require('express-validator');
 
 exports.newForm = async (req, res, next) => {
     try {
         const formName = req.body.formName;
         const service = req.body.service;
-        const newForm = new NewForm({
+        const newForm = new Form({
             formName,
             service
         });
@@ -52,13 +52,15 @@ exports.addingFormField = async (req, res, next) => {
             callbackUrl
         });
 
-        field.options.push({
-            title: title,
-            value: value2
-        })
+        if(title.length > 5 && value2.length > 2) {
+            field.options.push({
+                title: title,
+                value: value2
+            });
+        }        
 
         await field.save();
-        const form = await NewForm.findById(req.params.id);
+        const form = await Form.findById(req.params.id);
         form.fields.push(field._id);
         await form.save();
 
@@ -70,10 +72,34 @@ exports.addingFormField = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-
 }
 
-
 exports.updateActive = async (req, res, next) => {
-    console.log('hi');
+    try {
+        const form = await Form.findById(req.params.id);
+        const fields = await FormField.find();
+        if(fields.length < 2){
+            const err = new Error('form-field still need to add!');
+            err.statusCode = 422;
+            throw err;
+        }
+        const existSubmit = fields.filter(submit => submit.fieldName === 'submit');
+
+        if(existSubmit.length === 0){
+            const err = new Error('submit form-field is needed to active form!');
+            err.statusCode = 422;
+            throw err;
+        }
+
+        form.isActive = true;
+        await form.save();
+
+        res.status(200).json({
+            message: 'form activation success!'
+        })
+        
+
+    } catch (err) {
+        next(err);
+    }
 }
