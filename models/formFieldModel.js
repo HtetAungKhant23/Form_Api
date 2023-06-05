@@ -7,16 +7,19 @@ const formFieldSchema = new Schema({
     },
     placeholder: {
         type: String,
+        default: ""
     },
     isRequired: {
         type: Boolean,
         default: false
     },
     type: {
-        type: String
+        type: String,
+        required: true
     },      // input || radio || selectbox || textarea || submit || phoneinput
     value: {
-        type: String
+        type: String,
+        default: ""
     },
     isHidden: {
         type: Boolean,

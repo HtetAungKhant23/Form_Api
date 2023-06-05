@@ -20,21 +20,9 @@ exports.newForm = async (req, res, next) => {
     }
 };
 
-
 exports.addingFormField = async (req, res, next) => {
     try {
         const form = await Form.findById(req.params.id);
-        const {
-            fieldName,
-            placeholder,
-            isRequired,
-            type,     // input || radio || selectbox || textarea || submit || phoneinput
-            value,
-            isHidden,
-            isAction,
-            callbackUrl,
-            title,
-            value2 } = req.body;
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -42,22 +30,18 @@ exports.addingFormField = async (req, res, next) => {
             err.statusCode = 422;
             throw err;
         }
-        const field = new FormField({
-            fieldName,
-            placeholder,
-            isRequired,
-            type,     // input || radio || selectbox || textarea || submit || phoneinput
-            value,
-            isHidden,
-            isAction,
-            callbackUrl
-        });
-        if(title.length > 5 && value2.length > 2) {
-            field.options.push({
-                title: title,
-                value: value2
-            });
-        }        
+        const field = new FormField(req.body);
+
+        if(req.body.title && req.body.value2){
+            if (req.body.title.length > 5 && req.body.value2.length > 2) {
+                field.options.push({
+                    title: title,
+                    value: value2
+                });
+            }
+        }
+        field.options = [];        
+
         await field.save();
         form.fields.push(field._id);
         await form.save();
@@ -71,6 +55,58 @@ exports.addingFormField = async (req, res, next) => {
         next(err);
     }
 }
+
+
+// exports.addingFormField = async (req, res, next) => {
+//     try {
+//         const form = await Form.findById(req.params.id);
+//         const {
+//             fieldName,
+//             placeholder,
+//             isRequired,
+//             type,     // input || radio || selectbox || textarea || submit || phoneinput
+//             value,
+//             isHidden,
+//             isAction,
+//             callbackUrl,
+//             title,
+//             value2 } = req.body;
+
+//         const errors = validationResult(req);
+//         if (!errors.isEmpty()) {
+//             const err = new Error(errors.errors[0].msg);
+//             err.statusCode = 422;
+//             throw err;
+//         }
+//         const field = new FormField({
+//             fieldName,
+//             placeholder,
+//             isRequired,
+//             type,     // input || radio || selectbox || textarea || submit || phoneinput
+//             value,
+//             isHidden,
+//             isAction,
+//             callbackUrl
+//         });
+//         if(title.length > 5 && value2.length > 2) {
+//             field.options.push({
+//                 title: title,
+//                 value: value2
+//             });
+//         }        
+//         await field.save();
+//         form.fields.push(field._id);
+//         await form.save();
+
+//         res.status(200).json({
+//             message: 'adding form field success',
+//             formField: field
+//         });
+
+//     } catch (err) {
+//         next(err);
+//     }
+// }
 
 exports.updateActive = async (req, res, next) => {
     try {
